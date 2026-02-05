@@ -1,0 +1,76 @@
+Tp api
+
+(venv) (base) alice@MacBook-Pro-de-Alice-2 TP_API1 % curl -X POST http://localhost:3000/api/v1/auth/login \
+-H "Content-Type: application/json" \
+-d '{"email": "test@example.com", "password": "password123"}'
+{"status":"success","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NmZlOTU2YTIyYmI1N2E1ZWU1NWY3YyIsImlhdCI6MTc2ODk0MjQyMywiZXhwIjoxNzY5MDI4ODIzfQ.988vmIFiSLJUC708YjTFaVsN3EY_p2qVFvbItDIMk8k"}%     
+venv) (base) alice@MacBook-Pro-de-Alice-2 TP_API1 % curl -H "Authorizati
+on: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NmZlOTU2YTIyY
+mI1N2E1ZWU1NWY3YyIsImlhdCI6MTc2ODk0MzMzOCwiZXhwIjoxNzY5MDI5NzM4fQ.L7dlc_s
+G8S3wPFfCNIG9ttDEem1PboK8PqndGTVk_5Y" http://localhost:3000/api/v1/users/
+me
+{"status":"success","data":{"user":{"_id":"696fe956a22bb57a5ee55f7c","username":"testuser","email":"test@example.com","role":"user","__v":0}}}%   
+
+Test de connexion sécurisée
+Pour vérifier que tout fonctionne, utilisez cette commande :
+
+bash
+curl -k https://localhost:3000/
+Comment s'authentifier maintenant ?
+La procédure reste la même, mais en HTTPS :
+
+1. Login :
+
+bash
+curl -k -X POST https://localhost:3000/api/v1/auth/login \
+-H "Content-Type: application/json" \
+-d '{"email": "test@example.com", "password": "password123"}'
+2. Accès au profil (avec le token reçu) :
+
+bash
+curl -k -H "Authorization: Bearer <VOTRE_TOKEN>" https://localhost:3000/api/v1/users/me
+Le TP est maintenant complet au niveau des exigences de sécurité (HTTPS, JWT, Validation, Rate Limiting, Sanitization)
+
+Commandes de test (HTTPS + Jeton requis)
+Pour devenir Admin :
+
+bash
+curl -k -X PATCH https://localhost:3000/api/v1/users/make-me-admin \
+-H "Authorization: Bearer <VOTRE_TOKEN>"
+Pour créer un événement dans un groupe :
+
+bash
+curl -k -X POST https://localhost:3000/api/v1/events \
+-H "Authorization: Bearer <VOTRE_TOKEN>" \
+-H "Content-Type: application/json" \
+-d '{
+  "title": "Soirée Networking",
+  "date": "2026-06-15T18:00:00Z",
+  "location": "Paris",
+  "group": "<ID_DU_GROUPE>",
+  "description": "Événement sécurisé"
+}'
+Pour activer la billetterie :
+
+bash
+curl -k -X PATCH https://localhost:3000/api/v1/events/<ID_EVENT>/ticketing \
+-H "Authorization: Bearer <VOTRE_TOKEN>" \
+-H "Content-Type: application/json" \
+-d '{"price": 20}'
+
+
+
+
+netstat -anvp tcp | grep LISTE
+N
+
+
+Chef de Projet Data*
+Oui
+Commentaire
+Pas de commentaire
+
+Consultant Data et IA*
+Oui
+Commentaire
+Pas de commentaire

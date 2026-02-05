@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+
+# env files (secrets)
+.env
+.env.*
+!.env.example
+
+# SSL certs/keys (local dev)
+key.pem
+cert.pem
+
+# Postman (exports may include tokens)
+*.postman_environment.json
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Python venv (not used for Node project)
+venv/
+
+# Secrets (accidental)
+Sans titre 4.txt
+*.gcp.json
+*service_account*.json

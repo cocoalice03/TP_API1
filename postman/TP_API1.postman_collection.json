@@ -1,0 +1,1058 @@
+{
+  "info": {
+    "_postman_id": "2b695629-f007-44ea-8929-1f2d0430dc69",
+    "name": "TP_API1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "38995403"
+  },
+  "item": [
+    {
+      "name": "Login USER",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Validate HTTP status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Validate content type is JSON",
+              "pm.test(\"Response is JSON\", function () {",
+              "    pm.response.to.be.json;",
+              "});",
+              "",
+              "// Parse JSON safely",
+              "let jsonData = null;",
+              "try {",
+              "    jsonData = pm.response.json();",
+              "} catch (e) {",
+              "    // Leave jsonData as null so subsequent tests show clear failures",
+              "}",
+              "",
+              "// Basic shape checks",
+              "pm.test(\"Response body is an object\", function () {",
+              "    pm.expect(jsonData, \"Response body is not valid JSON\").to.be.an(\"object\");",
+              "});",
+              "",
+              "pm.test(\"Response has keys: status and token\", function () {",
+              "    pm.expect(jsonData).to.have.property(\"status\");",
+              "    pm.expect(jsonData).to.have.property(\"token\");",
+              "});",
+              "",
+              "// Expected values",
+              "pm.test(\"Status equals 'success'\", function () {",
+              "    pm.expect(jsonData && jsonData.status, \"Missing or invalid status\").to.eql(\"success\");",
+              "});",
+              "",
+              "// Token checks",
+              "pm.test(\"Token is a non-empty string\", function () {",
+              "    pm.expect(jsonData && jsonData.token, \"Missing token\").to.be.a(\"string\").and.not.empty;",
+              "});",
+              "",
+              "pm.test(\"Token resembles a JWT (three segments)\", function () {",
+              "    const token = jsonData && jsonData.token;",
+              "    pm.expect(token && token.split(\".\").length, \"Token does not look like a JWT\").to.eql(3);",
+              "});",
+              "",
+              "// Persist token to environment (preserves your original behavior)",
+              "if (jsonData && jsonData.token) {",
+              "    pm.environment.set(\"userToken\", jsonData.token);",
+              "}",
+              "",
+              "// Verify environment variable is set",
+              "pm.test(\"Token is set in environment\", function () {",
+              "    pm.expect(pm.environment.get(\"userToken\")).to.not.be.null;",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"bobrbac1@example.com\",\n  \"password\": \"password123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/auth/login",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Login USER",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"bobrbac1@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/login",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+            },
+            {
+              "key": "Cross-Origin-Opener-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Cross-Origin-Resource-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Origin-Agent-Cluster",
+              "value": "?1"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "no-referrer"
+            },
+            {
+              "key": "Strict-Transport-Security",
+              "value": "max-age=31536000; includeSubDomains"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-DNS-Prefetch-Control",
+              "value": "off"
+            },
+            {
+              "key": "X-Download-Options",
+              "value": "noopen"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "SAMEORIGIN"
+            },
+            {
+              "key": "X-Permitted-Cross-Domain-Policies",
+              "value": "none"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "X-RateLimit-Limit",
+              "value": "100"
+            },
+            {
+              "key": "X-RateLimit-Remaining",
+              "value": "93"
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 03 Feb 2026 22:34:00 GMT"
+            },
+            {
+              "key": "X-RateLimit-Reset",
+              "value": "1770158179"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "202"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"ca-TKk3FbTwIICXJC+BJ3hr/stqY4c\""
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"status\": \"success\",\n    \"token\": \"<JWT_REMOVED>\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get user",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/users/me",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "users",
+            "me"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Get user",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/users/me",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+            },
+            {
+              "key": "Cross-Origin-Opener-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Cross-Origin-Resource-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Origin-Agent-Cluster",
+              "value": "?1"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "no-referrer"
+            },
+            {
+              "key": "Strict-Transport-Security",
+              "value": "max-age=31536000; includeSubDomains"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-DNS-Prefetch-Control",
+              "value": "off"
+            },
+            {
+              "key": "X-Download-Options",
+              "value": "noopen"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "SAMEORIGIN"
+            },
+            {
+              "key": "X-Permitted-Cross-Domain-Policies",
+              "value": "none"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "X-RateLimit-Limit",
+              "value": "100"
+            },
+            {
+              "key": "X-RateLimit-Remaining",
+              "value": "92"
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 03 Feb 2026 22:50:59 GMT"
+            },
+            {
+              "key": "X-RateLimit-Reset",
+              "value": "1770159089"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "145"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"91-UQF6Ts3WMoKlCd07s2V+F9UNLG0\""
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"status\": \"success\",\n    \"data\": {\n        \"user\": {\n            \"_id\": \"69701cef545bde3aef18c143\",\n            \"username\": \"BobRBAC\",\n            \"email\": \"bobrbac1@example.com\",\n            \"role\": \"user\",\n            \"__v\": 0\n        }\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "login ADMIN",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Validate HTTP status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Validate content type is JSON",
+              "pm.test(\"Response is JSON\", function () {",
+              "    pm.response.to.be.json;",
+              "});",
+              "",
+              "// Parse JSON safely",
+              "let jsonData = null;",
+              "try {",
+              "    jsonData = pm.response.json();",
+              "} catch (e) {",
+              "    // Leave jsonData as null so subsequent tests show clear failures",
+              "}",
+              "",
+              "// Basic shape checks",
+              "pm.test(\"Response body is an object\", function () {",
+              "    pm.expect(jsonData, \"Response body is not valid JSON\").to.be.an(\"object\");",
+              "});",
+              "",
+              "pm.test(\"Response has keys: status and token\", function () {",
+              "    pm.expect(jsonData).to.have.property(\"status\");",
+              "    pm.expect(jsonData).to.have.property(\"token\");",
+              "});",
+              "",
+              "// Expected values",
+              "pm.test(\"Status equals 'success'\", function () {",
+              "    pm.expect(jsonData && jsonData.status, \"Missing or invalid status\").to.eql(\"success\");",
+              "});",
+              "",
+              "// Token checks",
+              "pm.test(\"Token is a non-empty string\", function () {",
+              "    pm.expect(jsonData && jsonData.token, \"Missing token\").to.be.a(\"string\").and.not.empty;",
+              "});",
+              "",
+              "pm.test(\"Token resembles a JWT (three segments)\", function () {",
+              "    const token = jsonData && jsonData.token;",
+              "    pm.expect(token && token.split(\".\").length, \"Token does not look like a JWT\").to.eql(3);",
+              "});",
+              "",
+              "// Persist token to environment (preserves original behavior)",
+              "if (jsonData && jsonData.token) {",
+              "    pm.environment.set(\"adminToken\", jsonData.token);",
+              "}",
+              "",
+              "// Verify environment variable is set",
+              "pm.test(\"Token is set in environment\", function () {",
+              "    pm.expect(pm.environment.get(\"adminToken\")).to.not.be.null;",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/auth/login",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "login ADMIN",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/login",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+            },
+            {
+              "key": "Cross-Origin-Opener-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Cross-Origin-Resource-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Origin-Agent-Cluster",
+              "value": "?1"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "no-referrer"
+            },
+            {
+              "key": "Strict-Transport-Security",
+              "value": "max-age=31536000; includeSubDomains"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-DNS-Prefetch-Control",
+              "value": "off"
+            },
+            {
+              "key": "X-Download-Options",
+              "value": "noopen"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "SAMEORIGIN"
+            },
+            {
+              "key": "X-Permitted-Cross-Domain-Policies",
+              "value": "none"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "X-RateLimit-Limit",
+              "value": "100"
+            },
+            {
+              "key": "X-RateLimit-Remaining",
+              "value": "97"
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 03 Feb 2026 22:39:48 GMT"
+            },
+            {
+              "key": "X-RateLimit-Reset",
+              "value": "1770159089"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "202"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"ca-pNMs0A2nyGkTn+K5gwU8iIyjwwY\""
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"status\": \"success\",\n    \"token\": \"<JWT_REMOVED>\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "groupe (USER)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.environment.set(\"groupId\", pm.response.json().data.group._id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Groupe Postman Test\",\n  \"description\": \"RBAC delete test\",\n  \"isPrivate\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/groups",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "groups"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "groupe (USER)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Groupe Postman Test\",\n  \"description\": \"RBAC delete test\",\n  \"isPrivate\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/groups",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "groups"
+              ]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+            },
+            {
+              "key": "Cross-Origin-Opener-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Cross-Origin-Resource-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Origin-Agent-Cluster",
+              "value": "?1"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "no-referrer"
+            },
+            {
+              "key": "Strict-Transport-Security",
+              "value": "max-age=31536000; includeSubDomains"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-DNS-Prefetch-Control",
+              "value": "off"
+            },
+            {
+              "key": "X-Download-Options",
+              "value": "noopen"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "SAMEORIGIN"
+            },
+            {
+              "key": "X-Permitted-Cross-Domain-Policies",
+              "value": "none"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "X-RateLimit-Limit",
+              "value": "100"
+            },
+            {
+              "key": "X-RateLimit-Remaining",
+              "value": "98"
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 03 Feb 2026 23:09:33 GMT"
+            },
+            {
+              "key": "X-RateLimit-Reset",
+              "value": "1770160976"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "275"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"113-BWQgUnPsdSvcCDp/4/7Htf2eiqI\""
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"status\": \"success\",\n    \"data\": {\n        \"group\": {\n            \"name\": \"Groupe Postman Test\",\n            \"description\": \"RBAC delete test\",\n            \"isPrivate\": false,\n            \"creator\": \"69701cef545bde3aef18c143\",\n            \"members\": [\n                \"69701cef545bde3aef18c143\"\n            ],\n            \"_id\": \"6982802dd9e6c06919b52bdf\",\n            \"createdAt\": \"2026-02-03T23:09:33.616Z\",\n            \"__v\": 0\n        }\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "RBAC user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 403\", function () {",
+              "  pm.response.to.have.status(403);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/groups/{{groupId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "groups",
+            "{{groupId}}"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "RBAC user",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/groups/{{groupId}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}"
+              ]
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+            },
+            {
+              "key": "Cross-Origin-Opener-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Cross-Origin-Resource-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Origin-Agent-Cluster",
+              "value": "?1"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "no-referrer"
+            },
+            {
+              "key": "Strict-Transport-Security",
+              "value": "max-age=31536000; includeSubDomains"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-DNS-Prefetch-Control",
+              "value": "off"
+            },
+            {
+              "key": "X-Download-Options",
+              "value": "noopen"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "SAMEORIGIN"
+            },
+            {
+              "key": "X-Permitted-Cross-Domain-Policies",
+              "value": "none"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "X-RateLimit-Limit",
+              "value": "100"
+            },
+            {
+              "key": "X-RateLimit-Remaining",
+              "value": "94"
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 03 Feb 2026 23:12:34 GMT"
+            },
+            {
+              "key": "X-RateLimit-Reset",
+              "value": "1770160976"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "50"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"32-h75O8z/47O3naq8bbbcDw2w7vpI\""
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"status\": \"fail\",\n    \"message\": \"Permission refusée.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "RBAC admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status is 204 No Content\", () => {",
+              "  pm.response.to.have.status(204);",
+              "});",
+              "",
+              "pm.test(\"If not 204, log details\", () => {",
+              "  if (pm.response.code !== 204) {",
+              "    pm.environment.set(\"lastDeleteStatus\", pm.response.code);",
+              "    pm.environment.set(\"lastDeleteBody\", pm.response.text());",
+              "  }",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/groups/{{groupId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "groups",
+            "{{groupId}}"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "RBAC admin",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/groups/{{groupId}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}"
+              ]
+            }
+          },
+          "status": "No Content",
+          "code": 204,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+            },
+            {
+              "key": "Cross-Origin-Opener-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Cross-Origin-Resource-Policy",
+              "value": "same-origin"
+            },
+            {
+              "key": "Origin-Agent-Cluster",
+              "value": "?1"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "no-referrer"
+            },
+            {
+              "key": "Strict-Transport-Security",
+              "value": "max-age=31536000; includeSubDomains"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-DNS-Prefetch-Control",
+              "value": "off"
+            },
+            {
+              "key": "X-Download-Options",
+              "value": "noopen"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "SAMEORIGIN"
+            },
+            {
+              "key": "X-Permitted-Cross-Domain-Policies",
+              "value": "none"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            },
+            {
+              "key": "X-RateLimit-Limit",
+              "value": "100"
+            },
+            {
+              "key": "X-RateLimit-Remaining",
+              "value": "97"
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 03 Feb 2026 23:24:51 GMT"
+            },
+            {
+              "key": "X-RateLimit-Reset",
+              "value": "1770161962"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"20-bff5r/a5MyNNWy9hjn8a8pOLDxA\""
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "cookie": [],
+          "body": null
+        }
+      ]
+    }
+  ]
+}
