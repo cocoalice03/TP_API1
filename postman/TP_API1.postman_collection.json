@@ -56,14 +56,27 @@
               "    pm.expect(token && token.split(\".\").length, \"Token does not look like a JWT\").to.eql(3);",
               "});",
               "",
-              "// Persist token to environment (preserves your original behavior)",
-              "if (jsonData && jsonData.token) {",
+              "// Persist token to environment only on success",
+              "if (pm.response.code === 200 && jsonData && jsonData.token) {",
               "    pm.environment.set(\"userToken\", jsonData.token);",
+              "} else {",
+              "    pm.environment.unset(\"userToken\");",
               "}",
               "",
-              "// Verify environment variable is set",
+              "// Verify environment variable is set only on success",
               "pm.test(\"Token is set in environment\", function () {",
-              "    pm.expect(pm.environment.get(\"userToken\")).to.not.be.null;",
+              "    if (pm.response.code === 200) {",
+              "        pm.expect(pm.environment.get(\"userToken\")).to.be.a('string').and.not.empty;",
+              "    } else {",
+              "        pm.expect(pm.environment.get(\"userToken\")).to.be.undefined;",
+              "    }",
+              "});",
+              "",
+              "pm.test(\"If login fails, it should be 401 with message\", function () {",
+              "    if (pm.response.code !== 200) {",
+              "        pm.response.to.have.status(401);",
+              "        pm.expect(jsonData).to.have.property('message');",
+              "    }",
               "});"
             ],
             "type": "text/javascript",
@@ -410,14 +423,27 @@
               "    pm.expect(token && token.split(\".\").length, \"Token does not look like a JWT\").to.eql(3);",
               "});",
               "",
-              "// Persist token to environment (preserves original behavior)",
-              "if (jsonData && jsonData.token) {",
+              "// Persist token to environment only on success",
+              "if (pm.response.code === 200 && jsonData && jsonData.token) {",
               "    pm.environment.set(\"adminToken\", jsonData.token);",
+              "} else {",
+              "    pm.environment.unset(\"adminToken\");",
               "}",
               "",
-              "// Verify environment variable is set",
+              "// Verify environment variable is set only on success",
               "pm.test(\"Token is set in environment\", function () {",
-              "    pm.expect(pm.environment.get(\"adminToken\")).to.not.be.null;",
+              "    if (pm.response.code === 200) {",
+              "        pm.expect(pm.environment.get(\"adminToken\")).to.be.a('string').and.not.empty;",
+              "    } else {",
+              "        pm.expect(pm.environment.get(\"adminToken\")).to.be.undefined;",
+              "    }",
+              "});",
+              "",
+              "pm.test(\"If login fails, it should be 401 with message\", function () {",
+              "    if (pm.response.code !== 200) {",
+              "        pm.response.to.have.status(401);",
+              "        pm.expect(jsonData).to.have.property('message');",
+              "    }",
               "});"
             ],
             "type": "text/javascript",
@@ -580,7 +606,8 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.environment.set(\"groupId\", pm.response.json().data.group._id);"
+              "pm.environment.set(\"groupId\", pm.response.json().data.group._id);",
+              "postman.setNextRequest(\"Join group (USER)\");"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -603,7 +630,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Groupe Postman Test\",\n  \"description\": \"RBAC delete test\",\n  \"isPrivate\": false\n}",
+          "raw": "{\n  \"name\": \"Groupe Postman Test {{$timestamp}}\",\n  \"description\": \"RBAC delete test\",\n  \"isPrivate\": false\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -628,7 +655,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Groupe Postman Test\",\n  \"description\": \"RBAC delete test\",\n  \"isPrivate\": false\n}",
+              "raw": "{\n  \"name\": \"Groupe Postman Test {{$timestamp}}\",\n  \"description\": \"RBAC delete test\",\n  \"isPrivate\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -752,7 +779,8 @@
             "exec": [
               "pm.test(\"Status code is 403\", function () {",
               "  pm.response.to.have.status(403);",
-              "});"
+              "});",
+              "postman.setNextRequest(\"RBAC admin\");"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -915,7 +943,8 @@
               "    pm.environment.set(\"lastDeleteStatus\", pm.response.code);",
               "    pm.environment.set(\"lastDeleteBody\", pm.response.text());",
               "  }",
-              "});"
+              "});",
+              "postman.setNextRequest(null);"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -1053,6 +1082,1176 @@
           "body": null
         }
       ]
+    },
+    {
+      "name": "Join group (USER)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 404) {",
+              "  console.log('Join group 404: groupId=', pm.environment.get('groupId'));",
+              "}",
+              "postman.setNextRequest(\"RBAC user\");"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/groups/{{groupId}}/join",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "groups",
+            "{{groupId}}",
+            "join"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get groups (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/groups",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "groups"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create event (USER)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);",
+              "pm.environment.set('eventDate', tomorrow.toISOString());"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "pm.environment.set('eventId', jsonData.data.event._id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Event Postman Test {{$timestamp}}\",\n  \"date\": \"{{eventDate}}\",\n  \"location\": \"Paris\",\n  \"description\": \"Event created from Postman\",\n  \"group\": \"{{groupId}}\",\n  \"hasTicketing\": false,\n  \"price\": 10,\n  \"bonusEnabled\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/events",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get events (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/events",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Join event (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/events/{{eventId}}/join",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "events",
+            "{{eventId}}",
+            "join"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Toggle ticketing (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"price\": 10\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/events/{{eventId}}/ticketing",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "events",
+            "{{eventId}}",
+            "ticketing"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Toggle bonus (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/events/{{eventId}}/bonus",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "events",
+            "{{eventId}}",
+            "bonus"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Buy ticket (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/events/{{eventId}}/buy-ticket",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "events",
+            "{{eventId}}",
+            "buy-ticket"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete event (USER should be 403)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/events/{{eventId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "events",
+            "{{eventId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete event (ADMIN should be 204)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 204', function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/events/{{eventId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "events",
+            "{{eventId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create thread (USER - group)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "pm.environment.set('threadId', jsonData.data.thread._id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Thread Postman Test {{$timestamp}}\",\n  \"groupId\": \"{{groupId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/threads",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "threads"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Post message (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"Hello from Postman\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/threads/{{threadId}}/messages",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "threads",
+            "{{threadId}}",
+            "messages"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get thread messages (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/threads/{{threadId}}/messages",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "threads",
+            "{{threadId}}",
+            "messages"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete thread (USER should be 403)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/threads/{{threadId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "threads",
+            "{{threadId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete thread (ADMIN should be 204)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 204', function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/threads/{{threadId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "threads",
+            "{{threadId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create album (USER - event)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "pm.environment.set('albumId', jsonData.data.album._id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Album Event Postman {{$timestamp}}\",\n  \"description\": \"Album lié à un event\",\n  \"event\": \"{{eventId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/social",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get albums (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/social?eventId={{eventId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social"
+          ],
+          "query": [
+            {
+              "key": "eventId",
+              "value": "{{eventId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add photo (USER)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "pm.environment.set('photoId', jsonData.data.photo._id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"url\": \"https://example.com/photo.jpg\",\n  \"caption\": \"Photo Postman\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/social/{{albumId}}/photos",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social",
+            "{{albumId}}",
+            "photos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get album photos (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/social/{{albumId}}/photos",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social",
+            "{{albumId}}",
+            "photos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add comment (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"Nice photo!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/social/photos/{{photoId}}/comments",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social",
+            "photos",
+            "{{photoId}}",
+            "comments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get photo comments (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/social/photos/{{photoId}}/comments",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social",
+            "photos",
+            "{{photoId}}",
+            "comments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete photo (USER should be 403)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/social/photos/{{photoId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social",
+            "photos",
+            "{{photoId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete photo (ADMIN should be 204)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 204', function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/social/photos/{{photoId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social",
+            "photos",
+            "{{photoId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete album (USER should be 403)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/social/{{albumId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social",
+            "{{albumId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete album (ADMIN should be 204)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 204', function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/social/{{albumId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "social",
+            "{{albumId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create poll (USER - event)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "pm.environment.set('pollId', jsonData.data.poll._id);",
+              "pm.environment.set('pollOptionId', jsonData.data.poll.options[0]._id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"Quel jour vous préférez ? {{$timestamp}}\",\n  \"options\": [\n    { \"text\": \"Samedi\" },\n    { \"text\": \"Dimanche\" }\n  ],\n  \"event\": \"{{eventId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/polls",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "polls"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get polls (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/polls?eventId={{eventId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "polls"
+          ],
+          "query": [
+            {
+              "key": "eventId",
+              "value": "{{eventId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vote poll (USER)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"optionId\": \"{{pollOptionId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/polls/{{pollId}}/vote",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "polls",
+            "{{pollId}}",
+            "vote"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete poll (USER should be 403)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{userToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/polls/{{pollId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "polls",
+            "{{pollId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete poll (ADMIN should be 204)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 204', function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/polls/{{pollId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "polls",
+            "{{pollId}}"
+          ]
+        }
+      },
+      "response": []
     }
   ]
 }
