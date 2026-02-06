@@ -53,6 +53,82 @@ Ce projet est une API pour un réseau social développée avec **Node.js** et **
    - `DELETE {{baseURL}}/groups/{{groupId}}` (avec `userToken`) → attendu `403`
    - `DELETE {{baseURL}}/groups/{{groupId}}` (avec `adminToken`) → attendu `204`
 
+### Documentation de la collection `TP_API1.postman_collection.json`
+
+#### Authentification
+
+- Les endpoints protégés utilisent un header `Authorization: Bearer <token>`.
+- La collection gère 2 tokens via des variables d'environnement :
+  - `userToken` : défini automatiquement après `Login USER`.
+  - `adminToken` : défini automatiquement après `login ADMIN`.
+
+Notes :
+
+- Les requêtes `POST /auth/login` n'ont pas besoin d'Authorization.
+- En cas d'échec du login, la collection **unset** le token correspondant pour éviter d'utiliser un token expiré/incorrect.
+
+#### Variables d'environnement (générées automatiquement)
+
+- `baseURL`
+- `userToken`, `adminToken`
+- `groupId`, `eventId`, `threadId`, `albumId`, `photoId`, `pollId`, `pollOptionId`
+- `eventDate` (date ISO générée en pre-request pour la création d'événement)
+
+#### Workflow Runner (ordre recommandé)
+
+1. `Login USER` (set `userToken`)
+2. `login ADMIN` (set `adminToken`)
+3. Groupes :
+   - `groupe (USER)` (set `groupId`)
+   - `Join group (USER)`
+   - `RBAC user` (DELETE group → attendu `403`)
+   - `RBAC admin` (DELETE group → attendu `204`)
+4. Événements : create/get/join/ticketing/bonus/buy-ticket + delete user/admin
+5. Threads : create + post message + get messages + delete user/admin
+6. Social : create album + add photo + add comment + delete user/admin
+7. Polls : create + vote + delete user/admin
+
+La collection utilise `postman.setNextRequest(...)` sur certaines requêtes afin de garantir l'ordre d'exécution et d'éviter les erreurs liées à des IDs manquants.
+
+#### Endpoints couverts par la collection
+
+- Auth
+  - `POST {{baseURL}}/auth/login` (USER / ADMIN)
+- Users
+  - `GET {{baseURL}}/users/me`
+- Groups
+  - `POST {{baseURL}}/groups`
+  - `POST {{baseURL}}/groups/{{groupId}}/join`
+  - `GET {{baseURL}}/groups`
+  - `DELETE {{baseURL}}/groups/{{groupId}}` (RBAC user=403 / admin=204)
+- Events
+  - `POST {{baseURL}}/events`
+  - `GET {{baseURL}}/events`
+  - `POST {{baseURL}}/events/{{eventId}}/join`
+  - `PATCH {{baseURL}}/events/{{eventId}}/ticketing`
+  - `PATCH {{baseURL}}/events/{{eventId}}/bonus`
+  - `POST {{baseURL}}/events/{{eventId}}/buy-ticket`
+  - `DELETE {{baseURL}}/events/{{eventId}}` (RBAC user=403 / admin=204)
+- Threads
+  - `POST {{baseURL}}/threads`
+  - `POST {{baseURL}}/threads/{{threadId}}/messages`
+  - `GET {{baseURL}}/threads/{{threadId}}/messages`
+  - `DELETE {{baseURL}}/threads/{{threadId}}` (RBAC user=403 / admin=204)
+- Social
+  - `POST {{baseURL}}/social`
+  - `GET {{baseURL}}/social?eventId={{eventId}}`
+  - `POST {{baseURL}}/social/{{albumId}}/photos`
+  - `GET {{baseURL}}/social/{{albumId}}/photos`
+  - `POST {{baseURL}}/social/photos/{{photoId}}/comments`
+  - `GET {{baseURL}}/social/photos/{{photoId}}/comments`
+  - `DELETE {{baseURL}}/social/photos/{{photoId}}` (RBAC user=403 / admin=204)
+  - `DELETE {{baseURL}}/social/{{albumId}}` (RBAC user=403 / admin=204)
+- Polls
+  - `POST {{baseURL}}/polls`
+  - `GET {{baseURL}}/polls?eventId={{eventId}}`
+  - `POST {{baseURL}}/polls/{{pollId}}/vote`
+  - `DELETE {{baseURL}}/polls/{{pollId}}` (RBAC user=403 / admin=204)
+
 - `POST https://localhost:3000/api/v1/auth/register` : Inscription
 - `POST https://localhost:3000/api/v1/auth/login` : Connexion
 - `GET https://localhost:3000/api/v1/users/me` : Profil (Protégé JWT)
